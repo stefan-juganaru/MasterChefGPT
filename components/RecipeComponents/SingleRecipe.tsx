@@ -35,7 +35,7 @@ const SingleRecipe = () => {
                     </ul>
                 </div>
                 <ul>
-                    {data.recipe.stepsOfPreparation.map((step: any) => {
+                    {data.recipe?.stepsOfPreparation.map((step: any) => {
                         return <li key={data.recipe.id} className="mb-4 bg-base-100 p-4 rounded-xl">
                             <p>{step!.toString()}</p>
                         </li>
