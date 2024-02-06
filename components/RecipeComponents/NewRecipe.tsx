@@ -84,7 +84,7 @@ const NewRecipe = () => {
                 <div className="grid grid-cols-[1fr,auto] gap-2">
                     <button type="button" className="btn btn-outline" onClick={addFields}>Add Ingredient</button>
                         <label className="label cursor-pointer gap-2">
-                            <span className="label-text">Remember me</span>
+                            <span className="label-text">Use strict ingredients</span>
                             <input type="checkbox" className="checkbox" checked={isStrict} onChange={(e) => setIsStrict(!isStrict)}/>
                         </label>
 
