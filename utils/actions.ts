@@ -95,7 +95,7 @@ export const getSingleRecipe = async (category: string, id: string) => {
             id: id
         }
     });
-    const image = await getImageFor(recipe.name);
+    const image = await getImageFor(recipe?.name);
 
     return {
         recipe,
@@ -210,7 +210,7 @@ export const subtractTokens = async (clerkId: string, tokens: number) => {
     });
     revalidatePath('/profile');
     // Return the new token value
-    return result.tokens;
+    return result?.tokens;
 };
 
 export const checkTokenTimer = async (clerkId: string) => {
