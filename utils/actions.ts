@@ -31,63 +31,28 @@ export const generateChatMessages = async (messages: any[]) => {
 };
 
 export const generateNewRecipe = async (instructions: instructionsJson) => {
-    const query = `Based on the ingredients provided, generate a JSON object containing a list of 1 to 4 recipes. The input ingredients and the strictness flag are as follows:
-    {
+    const query = `{
+  "task": "Generate recipes based on input ingredients and strictness level.",
+  "input": {
+    "ingredients": ${instructions.ingredients},
+    "isStrict": ${instructions.isStrict}
+  },
+  "output": "Generate a JSON object with 1 or 2 recipes using the input ingredients. If 'isStrict' is false, recipes can include additional ingredients but must use all listed ones. If 'isStrict' is true, use only the listed ingredients. If unable to use all ingredients or find any recipes, return an appropriate message.",
+  "responseFormat": {
+    "recipes": [
+      {
+        "name": "",
+        "categoryName": "based on the main ingredient. if not sure, put "Uncategorized",
         "ingredients": [],
-         "isStrict":boolean
-    }
-    
-
-If 
-    isStrict is false, additional ingredients may be included in the recipes, but all listed ingredients must be used. If 
-    isStrict is true, only the listed ingredients can be used.
-    
-If you detect another language in the input, try to answer in the same language (all the ingredients should be in the same language in order to do this). If not possible, use English.
-    
-This is the object from the user. The ingredients array will contain a list of ingredients : ${JSON.stringify(instructions)}
-Try to make the catergory of the recipe based on the main ingredient. If the main ingredient is not clear, use a generic category like "Uncategorized".
-
-
-The expected output should strictly be a JSON object formatted as shown below, containing the names and brief descriptions of the recipes. The format must be adhered to precisely:
-    {
-        "recipes": [
-    {
-      "name": "name of the recipe",
-      "categoryName": "a generic category based on the main ingredient",
-      "ingredients": [
-        list of ingredients (ALL INGREDIENTS USED)
-      ],
-      stepsOfPreparation: [
-        "Step 1: ",
-        "Step 2: ",
-        "Step 3: "
-        ...
-      ]
-    },
-            {
-      "name": "name of the recipe",
-      "ingredients": [
-        list of ingredients
-      ],
-      stepsOfPreparation: [
-        "Step 1: ",
-        "Step 2: ",
-        "Step 3: "
-        ...
-      ]
-    }
-            // Include up to 3 recipes
+        "stepsOfPreparation": [
+        Step 1: ...
+        Step 2: ...
+        ....
         ]
-    }
-  message: "I successfully found 2 recipes for you"
-}
-
-You need to be extremely strict with the format of the answer. If you don't follow the format, the test will fail.
-
-If the user gives you a list of ingredients that you can't use to make any recipe, you need to return an empty list of recipes and a message that says "I couldn't find any recipe for you".
-If the user gives you a list of ingredients that you can use to make a recipe, but you can't use all the ingredients, you need to return an empty list of recipes and a message that says "I couldn't find any recipe for you".
-
-`;
+      }
+    ],
+  }
+}`;
 
     try {
         const response = await openai.chat.completions.create({
@@ -100,7 +65,7 @@ If the user gives you a list of ingredients that you can use to make a recipe, b
         });
 
         const recipeData = JSON.parse(response.choices[0].message.content!);
-
+        console.log(response.choices[0].message.content + "HGEFADASD")
         if(!recipeData.recipes) {
             return null;
         }

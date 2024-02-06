@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import {ClerkProvider } from "@clerk/nextjs";
+import { SpeedInsights } from "@vercel/speed-insights/next"
+
 
 import Providers from "@/app/providers";
 
@@ -23,6 +25,7 @@ export default function RootLayout({
           <body className={inter.className}>
             <Providers>
                 {children}
+                <SpeedInsights/>
             </Providers>
           </body>
         </html>
