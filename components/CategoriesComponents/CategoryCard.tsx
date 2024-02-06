@@ -8,6 +8,7 @@ type Props = {
     name: string;
 }
 
+const url = `https://api.unsplash.com/search/photos?client_id=n3gLRWDB9QoD-U_XlRBchxEEsPlvlDKuh5XIImFJ2yY&query=`;
 const CategoryCard =  ({name}: Props) => {
     const [image, setImage] = useState<string >("");
     const endpoint = name.toLowerCase().replace(' ', '-');
@@ -19,7 +20,7 @@ const CategoryCard =  ({name}: Props) => {
                 if(name === "Uncategorized") {
                     imageName = "Generic food"
                 }
-                const { data } = await axios(`${process.env.UNSPLASH_URL}${imageName}`);
+                const { data } = await axios(`${url}${imageName}`);
                 setImage(data?.results[0]?.urls.raw);
             } catch (error) {
                 console.error('Failed to fetch image:', error);

@@ -12,15 +12,17 @@ type Recipe = {
     stepsOfPreparation: string[];
 }
 
+const url = `https://api.unsplash.com/search/photos?client_id=n3gLRWDB9QoD-U_XlRBchxEEsPlvlDKuh5XIImFJ2yY&query=`;
 
 const RecipeCard = (props: Recipe) => {
+    console.log(process.env.UNSPLASH_API_KEY)
     const [image, setImage] = useState<string >("");
     const endpoint = (`${props.categoryName}/${props.id}`).toLowerCase();
 
     useEffect(() => {
         const fetchImage = async () => {
             try {
-                const { data } = await axios(`${process.env.UNSPLASH_URL}${props.name}`);
+                const { data } = await axios(`${url}${props.name}`);
                 setImage(data?.results[0]?.urls.raw);
             } catch (error) {
                 console.error('Failed to fetch image:', error);
