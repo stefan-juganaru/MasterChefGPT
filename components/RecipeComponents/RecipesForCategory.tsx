@@ -26,7 +26,7 @@ const RecipesForCategory =  () => {
             <h1 className="w-full text-4xl my-12 capitalize text-center ">the list of recipes for {params.category}</h1>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
                 {
-                    data.map((recipe: any) => {
+                    data!.map((recipe: any) => {
                         return <RecipeCard key={recipe.id} name={recipe.name} categoryName={recipe.categoryName} id={recipe.id} ingredients={recipe.ingredients} stepsOfPreparation={recipe.stepsOfPreparation}/>
                     })
                 }
