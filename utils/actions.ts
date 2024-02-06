@@ -95,7 +95,7 @@ export const getSingleRecipe = async (category: string, id: string) => {
             id: id
         }
     });
-    const image = await getImageFor(recipe?.name);
+    const image = await getImageFor(recipe!.name);
 
     return {
         recipe,
