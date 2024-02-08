@@ -189,7 +189,7 @@ export const getSingleRecipe = async (category: string, id: string) => {
 }
 
 export const checkIfRecipeExists = async (name: string, clerkId: string) => {
-    const recipe =  await prisma.recipe.findUnique({
+    const recipe =  await prisma.recipe.findFirst({
         where: {
             name: name,
             clerkId: clerkId
