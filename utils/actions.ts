@@ -188,6 +188,17 @@ export const getSingleRecipe = async (category: string, id: string) => {
     }
 }
 
+export const checkIfRecipeExists = async (name: string, clerkId: string) => {
+    const recipe =  await prisma.recipe.findUnique({
+        where: {
+            name: name,
+            clerkId: clerkId
+        }
+    });
+
+    return recipe;
+}
+
 export const getCategoryIdFromName = async (categoryName: string) => {
     try {
         const category = await prisma.category.findFirst({
@@ -228,6 +239,10 @@ export const getAllRecipesForCategory = async (categoryName: string, clerkId: st
 
 export const addNewRecipeWithCategory = async (recipeData: any) => {
     const {userId} = auth();
+    const recipeExists = await  checkIfRecipeExists(recipeData.name, userId!)
+    if(recipeExists) {
+        return recipeExists;
+    }
     const category = await addCategory(recipeData.categoryName, userId!);
     const newRecipe = await prisma.recipe.create({
         data: {

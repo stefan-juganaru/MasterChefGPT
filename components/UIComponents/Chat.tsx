@@ -16,8 +16,7 @@ type UserMessage = {
 type ChatMessage = UserMessage | ChatCompletionMessage
 
 const Chat = () => {
-    const { messages, input, handleInputChange, handleSubmit } = useChat();
-    console.log(messages)
+    const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat();
     const {userId} = useAuth();
     const [text, setText] = useState("");
     const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]); // [ "hello", "hi"
@@ -51,12 +50,13 @@ const Chat = () => {
 
     const handleSubmitExtra = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        console.log("test")
         const currentTokens = await fetchUserTokensById(userId!);
         if(currentTokens! < 100) {
             toast.error("You don't have enough tokens to generate a response");
             return ;
         }
+        const newTokens = await subtractTokens(userId!, 150); //VERCEL AI SDK DOES NOT HAVE USAGE METRICS ( WE HARDCODE FOR NOW)
+        toast.success(`${newTokens} tokens remaining...`);
 
         handleSubmit(e);
     }
@@ -79,7 +79,7 @@ const Chat = () => {
             <form className="max-w-3xl pt:12" onSubmit={handleSubmitExtra}>
                 <div className="join w-full">
                     <input type="text" placeholder="text here" className="input input-bordered join-item w-full" value={input} onChange={handleInputChange} required/>
-                    <button className="join-item btn btn-outline" type="submit">Send</button>
+                    <button className="join-item btn btn-outline" type="submit" disabled={isLoading}>Send</button>
                 </div>
             </form>
 

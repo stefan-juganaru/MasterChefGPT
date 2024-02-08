@@ -29,8 +29,6 @@ model Recipe {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
   clerkId            String // relation to current user
-
-  @@unique(name)
 }
 
 model Token {

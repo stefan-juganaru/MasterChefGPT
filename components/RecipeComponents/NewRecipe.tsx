@@ -51,7 +51,6 @@ const NewRecipe = () => {
 
     const {complete, handleSubmit, isLoading} = useCompletion({
         api: '/api/completions',
-
     })
 
 
@@ -85,23 +84,29 @@ const NewRecipe = () => {
     const handleSubmitExtra = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const prompt =  await getPrompt({ingredients, isStrict})
-        console.log(prompt)
+
+        const tokens = await fetchUserTokensById(userId!);
+        if(tokens! < 500) {
+            toast.error("You don't have enough tokens to generate a tour");
+            return;
+        }
         const completion = await complete(prompt);
         if (!completion) throw new Error('Failed to get recipes');
 
         const response = JSON.parse(completion);
-        console.log(response)
 
-        response.recipes.map((recipe: any) => {
-                             let newRecipe = addNewRecipeWithCategory(recipe);
-                             if(!newRecipe) {
-                                 toast.error("Chef couldn't add one or more recipes to the database. Please try again.");
-                                 return ;
-                             }
-                         })
+        response.recipes.map( (recipe: any) => {
+            let newRecipe = addNewRecipeWithCategory(recipe);
+            if (!newRecipe) {
+                toast.error("Chef couldn't add one or more recipes to the database. Please try again.");
+                return;
+            }
+        })
+
+        await queryClient.invalidateQueries({queryKey:["categories"]});
         setIngredients(['', '', '']);
-        toast.success(`Recipes added successfully.`);
-
+        const newTokens = await subtractTokens(userId!, response.tokens!);
+        toast.success(`Recipes added successfully. ${newTokens} tokens remaining...`);
         handleSubmit(e);
     }
 
