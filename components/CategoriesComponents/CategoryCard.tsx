@@ -20,7 +20,7 @@ const CategoryCard =  ({name}: Props) => {
                 if(name === "Uncategorized") {
                     imageName = "Generic food"
                 }
-                const { data } = await axios(`${url}${imageName + "dish"}`);
+                const { data } = await axios(`${url}${imageName}`);
                 setImage(data?.results[0]?.urls.raw);
             } catch (error) {
                 console.error('Failed to fetch image:', error);
