@@ -1,10 +1,16 @@
 "use client"
-import React, { useState } from 'react';
+import React, {useState, useEffect, ReactEventHandler, FormEventHandler} from 'react';
 import Ingredient from "@/components/UIComponents/IngredientInput";
 import toast from "react-hot-toast";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
-import {generateNewRecipe, addNewRecipeWithCategory, fetchUserTokensById, subtractTokens} from "@/utils/actions";
+import {
+    addNewRecipeWithCategory,
+    fetchUserTokensById,
+    subtractTokens,
+    getPrompt
+} from "@/utils/actions";
 import {useAuth} from "@clerk/nextjs";
+import {useCompletion} from "ai/react";
 
 
 const NewRecipe = () => {
@@ -12,34 +18,40 @@ const NewRecipe = () => {
     const {userId} = useAuth();
     const [ingredients, setIngredients] = useState(['', '', '']);
     const [isStrict, setIsStrict] = useState(false);
-    const {mutate, isPending} = useMutation ({
-        mutationFn: async (instructions: {ingredients: string[], isStrict:boolean})=> {
 
-            const tokens = await fetchUserTokensById(userId!);
-            if(tokens! < 500) {
-                toast.error("You don't have enough tokens to generate a tour");
-                return null;
-            }
+    // const {mutate, isPending} = useMutation ({
+    //     mutationFn: async (instructions: {ingredients: string[], isStrict:boolean})=> {
+    //
+    //         const tokens = await fetchUserTokensById(userId!);
+    //         if(tokens! < 500) {
+    //             toast.error("You don't have enough tokens to generate a tour");
+    //             return null;
+    //         }
+    //
+    //             const response = await generateNewRecipe({ingredients: instructions.ingredients, isStrict: instructions.isStrict});
+    //             if(!response) {
+    //                 toast.error("Chef couldn't generate a recipe for you. Please try again.");
+    //                 return ;
+    //             }
+    //
+    //             response.recipes.map((recipe: any) => {
+    //                 let newRecipe = addNewRecipeWithCategory(recipe);
+    //                 if(!newRecipe) {
+    //                     toast.error("Chef couldn't add one or more recipes to the database. Please try again.");
+    //                     return ;
+    //                 }
+    //             })
+    //         await queryClient.invalidateQueries({queryKey:["categories"]});
+    //         const newTokens = await subtractTokens(userId!, response.tokens!);
+    //         toast.success(`Recipes added successfully. ${newTokens} tokens remaining...`);
+    //
+    //         return response.recipes;
+    //     }
+    // })
 
-                const response = await generateNewRecipe({ingredients: instructions.ingredients, isStrict: instructions.isStrict});
-                if(!response) {
-                    toast.error("Chef couldn't generate a recipe for you. Please try again.");
-                    return ;
-                }
+    const {complete, handleSubmit, isLoading} = useCompletion({
+        api: '/api/completions',
 
-                response.recipes.map((recipe: any) => {
-                    let newRecipe = addNewRecipeWithCategory(recipe);
-                    if(!newRecipe) {
-                        toast.error("Chef couldn't add one or more recipes to the database. Please try again.");
-                        return ;
-                    }
-                })
-            await queryClient.invalidateQueries({queryKey:["categories"]});
-            const newTokens = await subtractTokens(userId!, response.tokens!);
-            toast.success(`Recipes added successfully. ${newTokens} tokens remaining...`);
-
-            return response.recipes;
-        }
     })
 
 
@@ -59,21 +71,45 @@ const NewRecipe = () => {
         setIngredients(newIngredients);
     };
 
-    const handleSubmit = (e: { preventDefault: () => void; } ) => {
-        e.preventDefault();
-        mutate({ingredients: ingredients, isStrict: isStrict});
-        setIngredients(['', '', '']);
-    }
-
-
-    if(isPending) {
+    // const handleSubmit = (e: { preventDefault: () => void; } ) => {
+    //     e.preventDefault();
+    //     mutate({ingredients: ingredients, isStrict: isStrict});
+    //     setIngredients(['', '', '']);
+    // }
+    //
+    //
+    if(isLoading) {
         return <span className='loading loading-lg'></span>
     }
+
+    const handleSubmitExtra = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const prompt =  await getPrompt({ingredients, isStrict})
+        console.log(prompt)
+        const completion = await complete(prompt);
+        if (!completion) throw new Error('Failed to get recipes');
+
+        const response = JSON.parse(completion);
+        console.log(response)
+
+        response.recipes.map((recipe: any) => {
+                             let newRecipe = addNewRecipeWithCategory(recipe);
+                             if(!newRecipe) {
+                                 toast.error("Chef couldn't add one or more recipes to the database. Please try again.");
+                                 return ;
+                             }
+                         })
+        setIngredients(['', '', '']);
+        toast.success(`Recipes added successfully.`);
+
+        handleSubmit(e);
+    }
+
 
     return (
         <div className="w-full max-w-xl mt-4">
             <h1 className="text-2xl font-bold">Submit Your Ingredients to Our Chef</h1>
-            <form className="flex flex-col gap-3 mt-12 w-full" name="formName">
+            <form className="flex flex-col gap-3 mt-12 w-full" name="formName" onSubmit={handleSubmitExtra}>
                 {ingredients.map((ingredient, index) => (
                     <Ingredient
                         key={index}
@@ -89,7 +125,7 @@ const NewRecipe = () => {
                         </label>
 
                 </div>
-                <button type="submit" className="btn btn-primary" onClick={handleSubmit} disabled={isPending}>Ask Chef</button>
+                <button type="submit" className="btn btn-primary" >Ask Chef</button>
             </form>
         </div>
     );

@@ -22,7 +22,7 @@ const RecipeCard = (props: Recipe) => {
     useEffect(() => {
         const fetchImage = async () => {
             try {
-                const { data } = await axios(`${url}${props.name}`);
+                const { data } = await axios(`${url}${props.name + "dish"}`);
                 setImage(data?.results[0]?.urls.raw);
             } catch (error) {
                 console.error('Failed to fetch image:', error);
